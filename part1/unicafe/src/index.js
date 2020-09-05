@@ -10,23 +10,24 @@ const Button = ({ handleClick, text }) => (
 const Display = ({ name, value }) => <div>{name} {value}</div>
 
 const Statistics = ({ good, neutral, bad }) => {
-  const calculateAverage = () => {
-    const total = good + neutral + bad
-    return total === 0 ? 0 : (good - bad) / total
+  const total = good + neutral + bad
+
+  const average = (good - bad) / total
+
+  const positivePercentage = good / total * 100
+
+  if (total === 0) {
+    return <p>No feedback given</p>
   }
 
-  const calculatePositiveRatio = () => {
-    const total = good + neutral + bad
-    return total === 0 ? 0 : good / total * 100
-  }
   return (
     <div>
       <Display name="good" value={good}></Display>
       <Display name="neutral" value={neutral}></Display>
       <Display name="bad" value={bad}></Display>
-      <Display name="all" value={good + neutral + bad}></Display>
-      <Display name="average" value={calculateAverage()}></Display>
-      <Display name="positive" value={`${calculatePositiveRatio()} %`}></Display>
+      <Display name="all" value={total}></Display>
+      <Display name="average" value={average}></Display>
+      <Display name="positive" value={`${positivePercentage} %`}></Display>
     </div>
   )
 }
