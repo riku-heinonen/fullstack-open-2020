@@ -1,27 +1,26 @@
-import React, { useState } from 'react'
-import ReactDOM from 'react-dom'
+import React, { useState } from 'react';
 
-const Button = ({ handleClick, text }) => (
-  <button onClick={handleClick}>
-    {text}
-  </button>
-)
+import ReactDOM from 'react-dom';
+import axios from 'axios';
+
+const Button = ({ handleClick, text }) => <button onClick={handleClick}>{text}</button>;
 
 const Statistic = ({ name, value }) => (
   <tr>
-    <td>{name}</td><td>{value}</td>
+    <td>{name}</td>
+    <td>{value}</td>
   </tr>
-)
+);
 
 const Statistics = ({ good, neutral, bad }) => {
-  const total = good + neutral + bad
+  const total = good + neutral + bad;
 
-  const average = (good - bad) / total
+  const average = (good - bad) / total;
 
-  const positivePercentage = good / total * 100
+  const positivePercentage = (good / total) * 100;
 
   if (total === 0) {
-    return <p>No feedback given</p>
+    return <p>No feedback given</p>;
   }
 
   return (
@@ -35,13 +34,13 @@ const Statistics = ({ good, neutral, bad }) => {
         <Statistic name="positive" value={`${positivePercentage} %`}></Statistic>
       </tbody>
     </table>
-  )
-}
+  );
+};
 
 const App = () => {
-  const [good, setGood] = useState(0)
-  const [neutral, setNeutral] = useState(0)
-  const [bad, setBad] = useState(0)
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
 
   return (
     <div>
@@ -52,9 +51,7 @@ const App = () => {
       <h2>Statistics</h2>
       <Statistics good={good} neutral={neutral} bad={bad}></Statistics>
     </div>
-  )
-}
+  );
+};
 
-ReactDOM.render(<App />,
-  document.getElementById('root')
-)
+ReactDOM.render(<App />, document.getElementById('root'));
