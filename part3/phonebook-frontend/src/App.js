@@ -52,12 +52,18 @@ const App = () => {
 					})
 			}
 		} else {
-			personService.createPerson(newPerson).then((response) => {
-				setPeople(people.concat(response))
-				setSuccessNotification(`Added ${newName}`)
-				setNewName('')
-				setNewNumber('')
-			})
+			personService
+				.createPerson(newPerson)
+				.then((response) => {
+					console.log(response)
+					setPeople(people.concat(response))
+					setSuccessNotification(`Added ${newName}`)
+					setNewName('')
+					setNewNumber('')
+				})
+				.catch((error) => {
+					setErrorNotification(error.response.data.error)
+				})
 		}
 	}
 
