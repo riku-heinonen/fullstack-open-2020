@@ -2,3 +2,4 @@
 .vscode/
 .env
 .eslintrc.json
+requests.rest
