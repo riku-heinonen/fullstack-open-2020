@@ -4,15 +4,16 @@ import { fireEvent, render } from '@testing-library/react'
 
 import Blog from './Blog'
 import React from 'react'
+import { prettyDOM } from '@testing-library/dom'
 
 describe('<Blog />', () => {
-  let component, blog, likeBlog, deleteBlog
+  let blog, user, component, mockLikeHandler, mockDeleteHandler
 
   beforeEach(() => {
     const title = 'React patterns'
     const author = 'Michael Chan'
     const url = 'https://reactpatterns.com/'
-    const user = {
+    user = {
       id: '5a422a851b54a676234d17f7',
       username: 'tester',
       name: 'Test User'
@@ -25,28 +26,26 @@ describe('<Blog />', () => {
       id: '5a422a851b54a676234d17f7',
       likes: 7
     }
-
-    likeBlog = jest.fn()
-    deleteBlog = jest.fn()
-
+    mockLikeHandler = jest.fn()
+    mockDeleteHandler = jest.fn()
     component = render(
       <Blog
         user={user}
         blog={blog}
-        likeBlog={likeBlog}
-        deleteBlog={deleteBlog}></Blog>
+        likeBlog={mockLikeHandler}
+        deleteBlog={mockDeleteHandler}
+      />
     )
   })
 
-  test('displays only title by default',
-    () => {
-      const div = component.container.querySelector('.blog')
-      expect(div).toHaveTextContent(`${blog.title} by ${blog.author}`)
-      expect(component.getByText('View')).toBeDefined()
+  test('displays only title by default', () => {
+    const div = component.container.querySelector('.blog')
+    expect(div).toHaveTextContent(`${blog.title} by ${blog.author}`)
+    expect(component.getByText('View')).toBeDefined()
 
-      expect(div).not.toHaveTextContent(blog.url)
-      expect(div).not.toHaveTextContent(`Likes ${blog.likes}`)
-    })
+    expect(div).not.toHaveTextContent(blog.url)
+    expect(div).not.toHaveTextContent(`Likes ${blog.likes}`)
+  })
 
   test('displays all blog info when view button clicked', () => {
     let div = component.container.querySelector('.blog')
@@ -73,11 +72,20 @@ describe('<Blog />', () => {
     expect(likeButton).toBeDefined()
 
     fireEvent.click(likeButton)
-    console.log(likeBlog.mock.calls)
-    // expect(likeBlog.mock.calls).toHaveLength(1)
+    expect(mockLikeHandler.mock.calls).toHaveLength(1)
+
+    component.rerender(
+      <Blog
+        user={user}
+        blog={{ ...blog, likes: blog.likes + 1 }}
+        likeBlog={mockLikeHandler}
+        deleteBlog={mockDeleteHandler}
+      />
+    )
 
     fireEvent.click(likeButton)
-    console.log(likeBlog.mock.calls)
-    // expect(likeBlog.mock.calls).toHaveLength(2)
+    expect(mockLikeHandler.mock.calls).toHaveLength(2)
+    expect(mockLikeHandler.mock.calls[0][0].likes).toEqual(7)
+    expect(mockLikeHandler.mock.calls[1][0].likes).toEqual(8)
   })
 })

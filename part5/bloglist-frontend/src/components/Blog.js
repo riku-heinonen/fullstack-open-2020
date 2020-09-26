@@ -31,7 +31,7 @@ const Blog = ({ user, blog, likeBlog, deleteBlog }) => {
             </button>
           </div>
           <div>{blog.url}</div>
-          <div>
+          <div className='blog-likes'>
             Likes {blog.likes} <button onClick={likeBlog(blog)}> Like </button>
           </div>
           {user.id === blog.user.id ? (
@@ -44,7 +44,7 @@ const Blog = ({ user, blog, likeBlog, deleteBlog }) => {
         </div>
       ) : (
         <div>
-          {blog.title} by {blog.author} <button onClick={toggleDetails}> View </button>
+          {blog.title} by {blog.author} <button className='view-button' onClick={toggleDetails}> View </button>
         </div>
       )}
     </div>
