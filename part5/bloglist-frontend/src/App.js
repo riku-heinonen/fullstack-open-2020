@@ -13,16 +13,16 @@ const App = () => {
   const [ user, setUser ] = useState(null)
   const [ notification, setNotification ] = useState({
     message: null,
-    type: null,
+    type: null
   })
   const blogFormRef = useRef()
 
   useEffect(() => {
-    const fletchBlogs = async () => {
+    const fetchBlogs = async () => {
       const blogs = await blogService.getAll()
       setBlogs(blogs)
     }
-    fletchBlogs()
+    fetchBlogs()
   }, [])
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const App = () => {
     try {
       const updatedBlog = await blogService.replace({
         ...blogToLike,
-        likes: blogToLike.likes + 1,
+        likes: blogToLike.likes + 1
       })
       setBlogs(
         blogs.map((blog) => (blog.id === updatedBlog.id ? updatedBlog : blog))
