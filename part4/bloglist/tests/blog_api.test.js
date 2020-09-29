@@ -59,7 +59,7 @@ describe('blog api', () => {
       author: 'New author',
       title: 'New title',
       url: 'http://some.url',
-      likes: 10000
+      likes: 10000,
     }
     let response = await api
       .post('/api/blogs')
@@ -78,7 +78,7 @@ describe('blog api', () => {
       author: 'New author',
       title: 'New title',
       url: 'http://some.url',
-      likes: 10000
+      likes: 10000,
     }
     let response = await api.post('/api/blogs').send(newBlog).expect(401)
     expect(response.body.error).toEqual('invalid token')
@@ -91,7 +91,7 @@ describe('blog api', () => {
     const newBlog = {
       author: 'New author',
       title: 'New title',
-      url: 'http://some.url'
+      url: 'http://some.url',
     }
 
     const response = await api
@@ -105,7 +105,7 @@ describe('blog api', () => {
   test('bad request is returned if posting blog without url or title', async () => {
     const blogWithoutTitle = {
       author: 'New author',
-      url: 'http://some.url'
+      url: 'http://some.url',
     }
 
     await api
@@ -116,7 +116,7 @@ describe('blog api', () => {
 
     const blogWithoutUrl = {
       author: 'New author',
-      title: 'New title'
+      title: 'New title',
     }
 
     await api
@@ -148,7 +148,7 @@ describe('blog api', () => {
       author: 'Updated author',
       title: 'Updated title',
       url: 'http://updated.url',
-      likes: blogToUpdate.likes + 10
+      likes: blogToUpdate.likes + 10,
     }
     let response = await api
       .put(`/api/blogs/${blogToUpdate.id}`)
@@ -157,7 +157,7 @@ describe('blog api', () => {
     expect(response.body).toEqual({
       ...updatedBlog,
       id: blogToUpdate.id,
-      user: blogToUpdate.user.toString()
+      user: blogToUpdate.user,
     })
   })
 
