@@ -8,6 +8,8 @@ const { usersInDb } = require('./test_helper')
 
 describe('when there is initially one user in db', () => {
   beforeEach(async () => {
+    await User.deleteMany({})
+
     const passwordHash = await bcrypt.hash('sekret', 10)
     const user = new User({ username: 'root', passwordHash })
 
@@ -20,7 +22,7 @@ describe('when there is initially one user in db', () => {
     const newUser = {
       username: 'root',
       name: 'Superuser',
-      password: 'salainen'
+      password: 'salainen',
     }
 
     const result = await api
@@ -40,7 +42,7 @@ describe('when there is initially one user in db', () => {
 
     const newUser = {
       name: 'Superuser',
-      password: 'salainen'
+      password: 'salainen',
     }
 
     const result = await api
@@ -60,7 +62,7 @@ describe('when there is initially one user in db', () => {
 
     const newUser = {
       username: 'tester',
-      name: 'Test User'
+      name: 'Test User',
     }
 
     const result = await api
@@ -81,7 +83,7 @@ describe('when there is initially one user in db', () => {
     const newUser = {
       username: 'tester',
       name: 'Test User',
-      password: 'pa'
+      password: 'pa',
     }
 
     const result = await api
@@ -90,7 +92,9 @@ describe('when there is initially one user in db', () => {
       .expect(400)
       .expect('Content-Type', /application\/json/)
 
-    expect(result.body.error).toContain('password must be at least 3 characters long')
+    expect(result.body.error).toContain(
+      'password must be at least 3 characters long'
+    )
 
     const usersAtEnd = await usersInDb()
     expect(usersAtEnd).toHaveLength(usersAtStart.length)
