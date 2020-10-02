@@ -5,12 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=production node index.js",
-    "dev": "NODE_ENV=development nodemon index.js",
-    "test": "NODE_ENV=test jest --verbose --runInBand",
-    "start:test": "NODE_ENV=test node index.js"
-  },
-  "jest": {
-    "testEnvironment": "node"
+    "dev": "NODE_ENV=development nodemon index.js"
   },
   "author": "",
   "license": "ISC",
@@ -26,8 +21,6 @@
     "mongoose-unique-validator": "^2.0.3"
   },
   "devDependencies": {
-    "jest": "^26.4.2",
-    "nodemon": "^2.0.4",
-    "supertest": "^4.0.2"
+    "nodemon": "^2.0.4"
   }
 }
