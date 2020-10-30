@@ -1,9 +1,9 @@
-import { ADD_BOOK, ALL_AUTHORS, ALL_BOOKS } from '../queries'
 import React, { useState } from 'react'
 
+import { ADD_BOOK } from '../mutations'
 import { useMutation } from '@apollo/client'
 
-const NewBook = ({ setErrorMessage }) => {
+const NewBook = ({ setErrorMessage, updateBooksCache, updateAuthorsCache }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [published, setPublished] = useState('')
@@ -11,35 +11,19 @@ const NewBook = ({ setErrorMessage }) => {
   const [genres, setGenres] = useState([])
 
   const [createBook] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_AUTHORS }],
-    onError: error => {
+    onError: (error) => {
       console.error(error)
       setErrorMessage(error.graphQLErrors[0]?.message)
     },
-    update: (store, { data: { addBook } }) => {
-      const queryVariables = [...addBook.genres.map(genre => ({ genre })), {}]
-      queryVariables.forEach(variables => {
-        try {
-          const genreDataInStore = store.readQuery({
-            query: ALL_BOOKS,
-            variables: variables
-          })
-          store.writeQuery({
-            query: ALL_BOOKS,
-            variables: variables,
-            data: {
-              ...genreDataInStore,
-              allBooks: [...genreDataInStore.allBooks, addBook]
-            }
-          })
-        } catch (error) {
-          // query not in cache yet, no need to update
-        }
-      })
-    }
+    update: (store, response) => {
+      const addedBook = response.data.addBook
+      console.log(addedBook)
+      updateBooksCache(addedBook)
+      updateAuthorsCache(addedBook.author)
+    },
   })
 
-  const submit = async event => {
+  const submit = async (event) => {
     event.preventDefault()
     if (title && author && published && genres) {
       createBook({
@@ -47,8 +31,8 @@ const NewBook = ({ setErrorMessage }) => {
           title,
           author,
           published: Number(published),
-          genres
-        }
+          genres,
+        },
       })
     } else {
       setErrorMessage('All form fields must be non-empty')
@@ -73,11 +57,17 @@ const NewBook = ({ setErrorMessage }) => {
       <form onSubmit={submit}>
         <div>
           title
-          <input value={title} onChange={({ target }) => setTitle(target.value)} />
+          <input
+            value={title}
+            onChange={({ target }) => setTitle(target.value)}
+          />
         </div>
         <div>
           author
-          <input value={author} onChange={({ target }) => setAuthor(target.value)} />
+          <input
+            value={author}
+            onChange={({ target }) => setAuthor(target.value)}
+          />
         </div>
         <div>
           published
@@ -88,7 +78,10 @@ const NewBook = ({ setErrorMessage }) => {
           />
         </div>
         <div>
-          <input value={genre} onChange={({ target }) => setGenre(target.value)} />
+          <input
+            value={genre}
+            onChange={({ target }) => setGenre(target.value)}
+          />
           <button onClick={addGenre} type='button'>
             add genre
           </button>

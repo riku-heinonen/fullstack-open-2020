@@ -1,4 +1,4 @@
-import { CREATE_USER, LOGIN } from '../queries'
+import { CREATE_USER, LOGIN } from '../mutations'
 import React, { useEffect, useState } from 'react'
 
 import { useMutation } from '@apollo/client'
@@ -10,15 +10,15 @@ const LoginForm = ({ setErrorMessage, setToken, setPage }) => {
   const [favoriteGenre, setFavoriteGenre] = useState('')
 
   const [login, loginResult] = useMutation(LOGIN, {
-    onError: error => {
+    onError: (error) => {
       setErrorMessage(error.graphQLErrors[0].message)
-    }
+    },
   })
 
   const [createUser] = useMutation(CREATE_USER, {
-    onError: error => {
+    onError: (error) => {
       setErrorMessage(error.graphQLErrors[0].message)
-    }
+    },
   })
 
   useEffect(() => {
@@ -30,16 +30,18 @@ const LoginForm = ({ setErrorMessage, setToken, setPage }) => {
     }
   }, [loginResult.data, setPage, setToken])
 
-  const submitLogin = event => {
+  const submitLogin = (event) => {
     event.preventDefault()
     login({ variables: { username: loginUsername, password: loginPassword } })
     setLoginUsername('')
     setLoginPassword('')
   }
 
-  const submitCreateUser = event => {
+  const submitCreateUser = (event) => {
     event.preventDefault()
-    createUser({ variables: { username: newUsername, favoriteGenre: favoriteGenre } })
+    createUser({
+      variables: { username: newUsername, favoriteGenre: favoriteGenre },
+    })
     setNewUsername('')
     setFavoriteGenre('')
   }
@@ -72,7 +74,10 @@ const LoginForm = ({ setErrorMessage, setToken, setPage }) => {
         <form onSubmit={submitCreateUser}>
           <div>
             username
-            <input value={newUsername} onChange={({ target }) => setNewUsername(target.value)} />
+            <input
+              value={newUsername}
+              onChange={({ target }) => setNewUsername(target.value)}
+            />
           </div>
           <div>
             favorite genre

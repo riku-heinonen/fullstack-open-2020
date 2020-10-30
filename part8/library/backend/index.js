@@ -1,5 +1,11 @@
 require('dotenv').config()
-const { ApolloServer, UserInputError, AuthenticationError, gql } = require('apollo-server')
+const {
+  ApolloServer,
+  UserInputError,
+  AuthenticationError,
+  gql,
+  PubSub,
+} = require('apollo-server')
 const mongoose = require('mongoose')
 const Author = require('./models/Author')
 const Book = require('./models/Book')
@@ -18,14 +24,16 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
-    useCreateIndex: true
+    useCreateIndex: true,
   })
   .then(() => {
     console.log('connected to MongoDB')
   })
-  .catch(error => {
+  .catch((error) => {
     console.log('error connection to MongoDB:', error.message)
   })
+
+const pubsub = new PubSub()
 
 const typeDefs = gql`
   type Book {
@@ -63,10 +71,19 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addBook(title: String!, author: String!, published: Int!, genres: [String!]!): Book
+    addBook(
+      title: String!
+      author: String!
+      published: Int!
+      genres: [String!]!
+    ): Book
     editAuthor(name: String!, setBornTo: Int!): Author
     createUser(username: String!, favoriteGenre: String!): User
     login(username: String!, password: String!): Token
+  }
+
+  type Subscription {
+    bookAdded: Book!
   }
 `
 
@@ -75,29 +92,38 @@ const resolvers = {
     bookCount: () => Book.countDocuments(),
     authorCount: () => Author.countDocuments(),
     allBooks: async (root, args) => {
-      let booksToReturn = await Book.find({}).populate('author', { name: 1, born: 1 })
-      if (args.author) booksToReturn = booksToReturn.filter(book => book.author === args.author)
-      if (args.genre) booksToReturn = booksToReturn.filter(book => book.genres.includes(args.genre))
+      let booksToReturn = await Book.find({}).populate('author', {
+        name: 1,
+        born: 1,
+      })
+      if (args.author)
+        booksToReturn = booksToReturn.filter(
+          (book) => book.author === args.author
+        )
+      if (args.genre)
+        booksToReturn = booksToReturn.filter((book) =>
+          book.genres.includes(args.genre)
+        )
       return booksToReturn
     },
     allAuthors: async () => {
       const authors = await Author.find({})
       return await Promise.all(
-        authors.map(async author => {
+        authors.map(async (author) => {
           return {
             ...author.toObject(),
-            bookCount: await Book.countDocuments({ author: author._id })
+            bookCount: await Book.countDocuments({ author: author._id }),
           }
         })
       )
     },
     allGenres: async () => {
       const books = await Book.find({})
-      return [...new Set(books.map(book => book.genres).flat())]
+      return [...new Set(books.map((book) => book.genres).flat())]
     },
     me: (root, args, context) => {
       return context.currentUser
-    }
+    },
   },
   Mutation: {
     addBook: async (root, args, { currentUser }) => {
@@ -112,17 +138,34 @@ const resolvers = {
         title: args.title,
         author: author._id,
         published: args.published,
-        genres: args.genres
+        genres: args.genres,
       })
       try {
         await newBook.save()
         author.save()
       } catch (error) {
         throw new UserInputError(error.message, {
-          invalidArgs: args
+          invalidArgs: args,
         })
       }
-      return newBook.populate('author', { name: 1, born: 1 }).execPopulate()
+
+      const addedBook = await newBook
+        .populate('author', { name: 1, born: 1 })
+        .execPopulate()
+
+      const bookWithAuthorInfo = {
+        ...addedBook.toObject(),
+        author: {
+          ...addedBook.author.toObject(),
+          bookCount: await Book.countDocuments({
+            author: author._id,
+          }),
+        },
+      }
+
+      pubsub.publish('BOOK_ADDED', { bookAdded: bookWithAuthorInfo })
+
+      return bookWithAuthorInfo
     },
     editAuthor: async (root, args, { currentUser }) => {
       if (!currentUser) {
@@ -135,19 +178,22 @@ const resolvers = {
         await author.save()
       } catch (error) {
         throw new UserInputError(error.message, {
-          invalidArgs: args
+          invalidArgs: args,
         })
       }
       return author
     },
     createUser: async (root, args) => {
-      const user = new User({ username: args.username, favoriteGenre: args.favoriteGenre })
+      const user = new User({
+        username: args.username,
+        favoriteGenre: args.favoriteGenre,
+      })
 
       try {
         await user.save()
       } catch (error) {
         throw new UserInputError(error.message, {
-          invalidArgs: args
+          invalidArgs: args,
         })
       }
 
@@ -162,12 +208,17 @@ const resolvers = {
 
       const userForToken = {
         username: user.username,
-        id: user._id
+        id: user._id,
       }
 
       return { value: jwt.sign(userForToken, JWT_SECRET) }
-    }
-  }
+    },
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED']),
+    },
+  },
 }
 
 const server = new ApolloServer({
@@ -177,12 +228,15 @@ const server = new ApolloServer({
     const auth = req ? req.headers.authorization : null
     if (auth && auth.toLowerCase().startsWith('bearer ')) {
       const decodedToken = jwt.verify(auth.substring(7), JWT_SECRET)
-      const currentUser = await User.findById(decodedToken.id).populate('friends')
+      const currentUser = await User.findById(decodedToken.id).populate(
+        'friends'
+      )
       return { currentUser }
     }
-  }
+  },
 })
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`)
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`)
 })

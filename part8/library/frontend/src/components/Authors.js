@@ -1,30 +1,22 @@
-import { ALL_AUTHORS, SET_BIRTHYEAR } from '../queries'
 import React, { useEffect, useState } from 'react'
 
+import { SET_BIRTHYEAR } from '../mutations'
 import Select from 'react-select'
 import { useMutation } from '@apollo/client'
 
-const Authors = ({ authors, setErrorMessage }) => {
+const Authors = ({ authors, setErrorMessage, updateAuthorsCache }) => {
   const [birthYear, setBirthYear] = useState('')
   const [selectedAuthor, setSelectedAuthor] = useState(null)
 
   const [setAuthorBirthYear, mutationResult] = useMutation(SET_BIRTHYEAR, {
-    onError: error => {
+    onError: (error) => {
       console.error(error)
-      setErrorMessage(error.graphQLErrors[0].message)
+      setErrorMessage(error.graphQLErrors[0]?.message)
     },
-    update: (store, { data: { editAuthor } }) => {
-      const authorDataInStore = store.readQuery({ query: ALL_AUTHORS })
-      store.writeQuery({
-        query: ALL_AUTHORS,
-        data: {
-          ...authorDataInStore,
-          allAuthors: authorDataInStore.allAuthors.map(author =>
-            author.name === editAuthor.name ? { ...author, born: editAuthor.born } : author
-          )
-        }
-      })
-    }
+    update: (store, response) => {
+      const editedAuthor = response.data.editAuthor
+      updateAuthorsCache(editedAuthor)
+    },
   })
 
   useEffect(() => {
@@ -33,11 +25,11 @@ const Authors = ({ authors, setErrorMessage }) => {
     }
   }, [mutationResult, setErrorMessage])
 
-  const submit = event => {
+  const submit = (event) => {
     event.preventDefault()
     if (selectedAuthor && birthYear) {
       setAuthorBirthYear({
-        variables: { name: selectedAuthor.value, setBornTo: Number(birthYear) }
+        variables: { name: selectedAuthor.value, setBornTo: Number(birthYear) },
       })
     } else {
       setErrorMessage('All form fields must be non-empty')
@@ -59,7 +51,7 @@ const Authors = ({ authors, setErrorMessage }) => {
                   <th>born</th>
                   <th>books</th>
                 </tr>
-                {authors.map(a => (
+                {authors.map((a) => (
                   <tr key={a.name}>
                     <td>{a.name}</td>
                     <td>{a.born}</td>
@@ -76,15 +68,18 @@ const Authors = ({ authors, setErrorMessage }) => {
               <Select
                 defaultValue={selectedAuthor}
                 onChange={setSelectedAuthor}
-                options={authors.map(author => ({
+                options={authors.map((author) => ({
                   value: author.name,
-                  label: author.name
+                  label: author.name,
                 }))}
               />
             </div>
             <div>
               Born
-              <input value={birthYear} onChange={({ target }) => setBirthYear(target.value)} />
+              <input
+                value={birthYear}
+                onChange={({ target }) => setBirthYear(target.value)}
+              />
             </div>
             <button type='submit'> Update author </button>
           </form>
