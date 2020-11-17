@@ -1,6 +1,6 @@
 import cors from 'cors';
-import diagnosisRouter from './routes/diagnoses';
 import express from 'express';
+import diagnosisRouter from './routes/diagnoses';
 import patientRouter from './routes/patients';
 const app = express();
 
