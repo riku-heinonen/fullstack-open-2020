@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Container,
   Grid,
@@ -9,12 +8,13 @@ import {
 } from "semantic-ui-react";
 import { Diagnosis, HospitalEntry } from "../types";
 
+import React from "react";
+
 interface HospitalEntryProps {
   entry: HospitalEntry & { diagnoses?: Diagnosis[] };
 }
 
 const HospitalEntryDetails: React.FC<HospitalEntryProps> = ({ entry }) => {
-  console.log(entry.diagnoses);
   return (
     <Segment>
       <Grid padded>

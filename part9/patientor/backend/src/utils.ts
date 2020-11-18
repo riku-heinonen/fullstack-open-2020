@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import diagnoses from "./data/diagnoses";
 import {
   EntryDetails,
   EntryType,
@@ -11,6 +10,8 @@ import {
   HealthCheckRating,
   PatientDetails,
 } from "./types";
+
+import diagnoses from "./data/diagnoses";
 
 const isString = (text: any): text is string => {
   return typeof text === "string" || text instanceof String;
@@ -78,7 +79,7 @@ const parseEntryType = (str: any): EntryType => {
 };
 
 const parseHealthCheckRating = (object: any): HealthCheckRating => {
-  if (!object || !(object instanceof Number)) {
+  if (!object || isNaN(Number(object))) {
     throw new Error("Invalid or missing value: " + object);
   }
   switch (object) {
@@ -119,7 +120,7 @@ export const toEntryDetails = (object: any): EntryDetails => {
         ...baseEntry,
         type: "Hospital",
         discharge: {
-          date: parseDate(object.dischargedate),
+          date: parseDate(object.discharge.date),
           criteria: parseString(object.discharge.criteria),
         },
       };
@@ -128,10 +129,12 @@ export const toEntryDetails = (object: any): EntryDetails => {
         ...baseEntry,
         type: "OccupationalHealthcare",
         employerName: parseString(object.employerName),
-        sickLeave: {
-          startDate: parseDate(object.sickLeave.startDate),
-          endDate: parseDate(object.sickLeave.endDate),
-        },
+        sickLeave: object.sickLeave
+          ? {
+              startDate: parseDate(object.sickLeave.startDate),
+              endDate: parseDate(object.sickLeave.endDate),
+            }
+          : undefined,
       };
     case "HealthCheck":
       return {

@@ -1,5 +1,3 @@
-import { v4 as uuid } from "uuid";
-import patients from "../data/patients";
 import {
   Entry,
   EntryDetails,
@@ -7,6 +5,9 @@ import {
   PatientDetails,
   PublicPatient,
 } from "../types";
+
+import patients from "../data/patients";
+import { v4 as uuid } from "uuid";
 
 const getPatients = (): PublicPatient[] => {
   return patients.map(({ id, name, dateOfBirth, gender, occupation }) => ({

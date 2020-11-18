@@ -10,17 +10,19 @@ export enum Gender {
   Other = "other",
 }
 
-interface Discharge {
+export interface Discharge {
   date: string;
   criteria: string;
 }
 
-interface SickLeave {
+export interface SickLeave {
   startDate: string;
   endDate: string;
 }
 
-interface BaseEntry {
+export type EntryType = "Hospital" | "HealthCheck" | "OccupationalHealthcare";
+
+export interface BaseEntry {
   id: string;
   description: string;
   date: string;
@@ -56,6 +58,10 @@ export type Entry =
   | OccupationalHealthcareEntry
   | HealthCheckEntry;
 
+export type ApiEntryDetails =
+  | Omit<HospitalEntry, "id">
+  | Omit<OccupationalHealthcareEntry, "id">
+  | Omit<HealthCheckEntry, "id">;
 export interface Patient {
   id: string;
   name: string;

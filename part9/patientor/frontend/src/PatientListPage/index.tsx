@@ -1,14 +1,14 @@
-import axios from "axios";
-import React from "react";
-import { useHistory } from "react-router-dom";
 import { Button, Container, Table } from "semantic-ui-react";
-import AddPatientModal from "../AddPatientModal";
-import { PatientFormValues } from "../AddPatientModal/AddPatientForm";
-import HealthRatingBar from "../components/HealthRatingBar";
-import { apiBaseUrl } from "../constants";
-import { useStateValue } from "../state";
-import { Patient } from "../types";
 
+import AddPatientModal from "../AddPatientModal";
+import HealthRatingBar from "../components/HealthRatingBar";
+import { Patient } from "../types";
+import { PatientFormValues } from "../AddPatientModal/AddPatientForm";
+import React from "react";
+import { apiBaseUrl } from "../constants";
+import axios from "axios";
+import { useHistory } from "react-router-dom";
+import { useStateValue } from "../state";
 
 const PatientListPage: React.FC = () => {
   const [{ patients }, dispatch] = useStateValue();
@@ -53,12 +53,15 @@ const PatientListPage: React.FC = () => {
         </Table.Header>
         <Table.Body>
           {Object.values(patients).map((patient: Patient) => (
-            <Table.Row key={patient.id} onClick={() => history.push(`/patients/${patient.id}`)}>
+            <Table.Row
+              key={patient.id}
+              onClick={() => history.push(`/patients/${patient.id}`)}
+            >
               <Table.Cell>{patient.name}</Table.Cell>
               <Table.Cell>{patient.gender}</Table.Cell>
               <Table.Cell>{patient.occupation}</Table.Cell>
               <Table.Cell>
-                <HealthRatingBar showText={false} rating={1} />
+                <HealthRatingBar showText={false} rating={2} />
               </Table.Cell>
             </Table.Row>
           ))}

@@ -1,19 +1,18 @@
-import { ErrorMessage, Field, FieldProps, FormikProps } from "formik";
-import React from "react";
 import { Dropdown, DropdownProps, Form } from "semantic-ui-react";
-import { Diagnosis } from "../types";
+import { ErrorMessage, Field, FieldProps, FormikProps } from "formik";
 
-// structure of a single option
+import { Diagnosis } from "../types";
+import React from "react";
+
 export type EntryTypeOption = {
   value: string;
   label: string;
 };
 
-// props for select field component
 type SelectFieldProps = {
   name: string;
   label: string;
-  options: GenderOption[];
+  options: EntryTypeOption[];
 };
 
 export const SelectField: React.FC<SelectFieldProps> = ({
@@ -52,9 +51,6 @@ export const TextField: React.FC<TextProps> = ({
   </Form.Field>
 );
 
-/*
-  for exercises 9.24.-
-*/
 interface NumberProps extends FieldProps {
   label: string;
   errorMessage?: string;

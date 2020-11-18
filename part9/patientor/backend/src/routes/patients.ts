@@ -1,6 +1,8 @@
+import toPatientDetails, { toEntryDetails } from "../utils";
+
 import express from "express";
 import patientService from "../services/patients";
-import toPatientDetails, { toEntryDetails } from "../utils";
+
 const router = express.Router();
 
 router.get("/", (_req, res) => {
